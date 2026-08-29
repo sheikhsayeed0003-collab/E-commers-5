@@ -1,57 +1,54 @@
-# Vercel Deployment Guide
+# Vercel Deployment Guide (MongoDB)
 
-## 1. Create PostgreSQL database (free)
+## Before deploy — MongoDB Atlas
 
-Use [Neon](https://neon.tech) or Supabase:
+1. Open [MongoDB Atlas](https://cloud.mongodb.com) → your cluster
+2. **Network Access** → Add IP Address → **Allow Access from Anywhere** (`0.0.0.0/0`)
+   - Vercel IPs change; without this the site will fail to connect to DB
+3. Confirm database user password works (connection string already in local `.env`)
 
-1. Create project → copy **Connection string**
-2. Use the **pooled** URL for serverless (Neon: enable connection pooling)
+## Deploy steps
 
-Example:
-```
-postgresql://user:pass@ep-xxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
-```
+### 1. Import on Vercel
 
-## 2. Push code to GitHub
+1. Go to [vercel.com](https://vercel.com) → **Add New Project**
+2. Import GitHub repo: `sheikhsayeed0003-collab/E-commers-5`
+3. Framework: **Next.js** (auto)
+4. Root directory: leave default
 
-```bash
-git add .
-git commit -m "Prepare for Vercel deploy"
-git push
-```
+### 2. Environment Variables (Production + Preview)
 
-## 3. Import on Vercel
-
-1. [vercel.com](https://vercel.com) → **Add New Project** → import repo
-2. Framework: **Next.js** (auto-detected)
-3. **Environment Variables** (Production + Preview):
-
-| Variable | Value |
-|----------|--------|
-| `DATABASE_URL` | Your PostgreSQL connection string |
-| `NEXTAUTH_URL` | `https://your-app.vercel.app` (update after first deploy) |
-| `NEXTAUTH_SECRET` | Random string (`openssl rand -base64 32`) |
+| Name | Value |
+|------|--------|
+| `DATABASE_URL` | `mongodb+srv://USER:PASS@cluster0.ieavyiz.mongodb.net/esy?retryWrites=true&w=majority&appName=Cluster0` |
+| `NEXTAUTH_URL` | Leave blank first, or set after first deploy to `https://YOUR-PROJECT.vercel.app` |
+| `NEXTAUTH_SECRET` | Long random string (e.g. generate: `openssl rand -base64 32`) |
 | `ADMIN_EMAIL` | `admin@esy.com` |
-| `ADMIN_PASSWORD` | Strong password |
+| `ADMIN_PASSWORD` | Your admin password |
 
-4. Click **Deploy**
+Use the **same** MongoDB URL as local (database name `esy` must be in the path).
 
-## 4. Seed database (once, after first deploy)
+### 3. Deploy
 
-On your PC, set production `DATABASE_URL` in `.env`, then:
+Click **Deploy**. Build runs: `prisma generate && next build`.
 
-```bash
-npm run db:setup
-```
+### 4. After first deploy
 
-This creates tables and demo products/admin user.
+1. Copy your Vercel URL (e.g. `https://e-commers-5.vercel.app`)
+2. Set env `NEXTAUTH_URL` = that URL
+3. **Redeploy** (Deployments → … → Redeploy)
 
-## 5. Update NEXTAUTH_URL
+Database is already seeded on Atlas — no need to seed again unless empty.
 
-After deploy, set `NEXTAUTH_URL` to your real Vercel URL (e.g. `https://esy.vercel.app`) and **Redeploy**.
+## Login
+
+| Role | URL | Email | Password |
+|------|-----|-------|----------|
+| Admin | `/admin` | `admin@esy.com` | (your ADMIN_PASSWORD) |
+| Customer | `/account/login` | `customer@esy.com` | `customer123` |
 
 ## Notes
 
-- **Admin images on Vercel:** Use **Add URL** (paste `https://picsum.photos/seed/...`) — file upload does not persist on serverless.
-- **Login:** Admin → `/admin` | Customer → `/account/login`
-- **Build:** Runs `prisma generate && next build` automatically.
+- Admin product images: paste image **URL** (file upload does not persist on Vercel serverless)
+- Do **not** commit `.env` — secrets only in Vercel dashboard
+- If home page errors: check Atlas Network Access allows `0.0.0.0/0`
