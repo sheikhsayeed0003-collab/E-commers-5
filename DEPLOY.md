@@ -21,7 +21,7 @@
 | Name | Value |
 |------|--------|
 | `DATABASE_URL` | `mongodb+srv://USER:PASS@cluster0.ieavyiz.mongodb.net/esy?retryWrites=true&w=majority&appName=Cluster0` |
-| `NEXTAUTH_URL` | Leave blank first, or set after first deploy to `https://YOUR-PROJECT.vercel.app` |
+| `NEXTAUTH_URL` | `https://e-commers-5.vercel.app` (must include `https://`) |
 | `NEXTAUTH_SECRET` | Long random string (e.g. generate: `openssl rand -base64 32`) |
 | `ADMIN_EMAIL` | `admin@esy.com` |
 | `ADMIN_PASSWORD` | Your admin password |

@@ -6,13 +6,18 @@ import { HeroProductGrid } from "@/components/home/HeroProductGrid";
 import { prisma } from "@/lib/prisma";
 
 async function getHomeData() {
-  const [featured, deals, categories, latest] = await Promise.all([
-    prisma.product.findMany({ where: { isFeatured: true }, take: 10, orderBy: { soldCount: "desc" } }),
-    prisma.product.findMany({ where: { isDeal: true }, take: 10, orderBy: { price: "asc" } }),
-    prisma.category.findMany({ orderBy: { sortOrder: "asc" }, take: 12 }),
-    prisma.product.findMany({ take: 15, orderBy: { createdAt: "desc" } }),
-  ]);
-  return { featured, deals, categories, latest };
+  try {
+    const [featured, deals, categories, latest] = await Promise.all([
+      prisma.product.findMany({ where: { isFeatured: true }, take: 10, orderBy: { soldCount: "desc" } }),
+      prisma.product.findMany({ where: { isDeal: true }, take: 10, orderBy: { price: "asc" } }),
+      prisma.category.findMany({ orderBy: { sortOrder: "asc" }, take: 12 }),
+      prisma.product.findMany({ take: 15, orderBy: { createdAt: "desc" } }),
+    ]);
+    return { featured, deals, categories, latest };
+  } catch (error) {
+    console.error("Homepage data error:", error);
+    return { featured: [], deals: [], categories: [], latest: [] };
+  }
 }
 
 export async function HomePage() {
